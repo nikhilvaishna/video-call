@@ -46,7 +46,7 @@ export default function VideoMeetComponent() {
 
   let [message, setMessage] = useState("");
 
-  let [newMessages, setNewMessages] = useState(3);
+  let [newMessages, setNewMessages] = useState(0);
 
   let [askForUsername, setAskForUsername] = useState(true);
 
@@ -74,9 +74,8 @@ export default function VideoMeetComponent() {
   }, []);
 
   useEffect(() => {
-    console.log("HELLO");
     getPermissions();
-  });
+  }, []);
 
   let getDislayMedia = () => {
     if (screen) {
@@ -109,6 +108,7 @@ export default function VideoMeetComponent() {
       if (audioPermission) {
         setAudioAvailable(true);
         console.log("Audio permission granted");
+        return;
       } else {
         setAudioAvailable(false);
         console.log("Audio permission denied");
