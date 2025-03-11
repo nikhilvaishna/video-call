@@ -1,0 +1,45 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+debug.log
+logfile.json
+
+# Database
+*.sqlite
+*.sqlite3
+dump.rdb
+*.pid
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Editor & IDE files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Build and dependencies
+dist/
+build/
+coverage/
+
+# Temporary files
+tmp/
+temp/
