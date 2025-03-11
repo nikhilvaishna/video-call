@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import io from "socket.io-client";
-import { Badge, IconButton, TextField } from "@mui/material";
+import { Badge, IconButton, TextField, Box } from "@mui/material";
 import { Button } from "@mui/material";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
@@ -11,6 +11,7 @@ import MicOffIcon from "@mui/icons-material/MicOff";
 import ScreenShareIcon from "@mui/icons-material/ScreenShare";
 import StopScreenShareIcon from "@mui/icons-material/StopScreenShare";
 import ChatIcon from "@mui/icons-material/Chat";
+import CloseIcon from "@mui/icons-material/Close";
 import server from "../environment";
 
 const server_url = server;
@@ -55,10 +56,22 @@ export default function VideoMeetComponent() {
 
   let [videos, setVideos] = useState([]);
 
-  // TODO
-  // if(isChrome() === false) {
+  // New state variables for responsive design
+  const [isMobile, setIsMobile] = useState(false);
+  const [chatOpen, setChatOpen] = useState(false);
+  const chatContainerRef = useRef(null);
 
-  // }
+  // Check for mobile device on component mount
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   useEffect(() => {
     console.log("HELLO");
@@ -130,6 +143,7 @@ export default function VideoMeetComponent() {
       console.log("SET STATE HAS ", video, audio);
     }
   }, [video, audio]);
+
   let getMedia = () => {
     setVideo(videoAvailable);
     setAudio(audioAvailable);
@@ -426,6 +440,7 @@ export default function VideoMeetComponent() {
     ctx.resume();
     return Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
   };
+
   let black = ({ width = 640, height = 480 } = {}) => {
     let canvas = Object.assign(document.createElement("canvas"), {
       width,
@@ -440,6 +455,7 @@ export default function VideoMeetComponent() {
     setVideo(!video);
     // getUserMedia();
   };
+
   let handleAudio = () => {
     setAudio(!audio);
     // getUserMedia();
@@ -450,6 +466,7 @@ export default function VideoMeetComponent() {
       getDislayMedia();
     }
   }, [screen]);
+
   let handleScreen = () => {
     setScreen(!screen);
   };
@@ -462,13 +479,18 @@ export default function VideoMeetComponent() {
     window.location.href = "/home";
   };
 
+  // Modified chat functions for responsive design
   let openChat = () => {
+    setChatOpen(true);
     setModal(true);
     setNewMessages(0);
   };
+
   let closeChat = () => {
+    setChatOpen(false);
     setModal(false);
   };
+
   let handleMessage = (e) => {
     setMessage(e.target.value);
   };
@@ -484,11 +506,11 @@ export default function VideoMeetComponent() {
   };
 
   let sendMessage = () => {
+    if (message.trim() === "") return;
+
     console.log(socketRef.current);
     socketRef.current.emit("chat-message", message, username);
     setMessage("");
-
-    // this.setState({ message: "", sender: username })
   };
 
   let connect = () => {
@@ -496,44 +518,94 @@ export default function VideoMeetComponent() {
     getMedia();
   };
 
+  // Function to determine video grid class based on participant count
+  const getParticipantClass = () => {
+    const count = videos.length;
+    if (count === 0) return "";
+    if (count === 1) return styles["participants-2"]; // Including local user
+    if (count <= 3) return styles["participants-3"];
+    if (count <= 4) return styles["participants-4"];
+    return styles["participants-many"];
+  };
+
+  // Function to handle message scrolling
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   return (
     <div>
       {askForUsername === true ? (
-        <div>
-          <h2>Enter into Lobby </h2>
-          <TextField
-            id="outlined-basic"
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            variant="outlined"
-          />
-          <Button variant="contained" onClick={connect}>
-            Connect
-          </Button>
+        <div className={styles["lobby-container"]}>
+          <h2>Enter into Lobby</h2>
+          <div className={styles["lobby-form"]}>
+            <TextField
+              id="outlined-basic"
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              variant="outlined"
+              fullWidth
+              InputProps={{ style: { color: "white", borderColor: "white" } }}
+              InputLabelProps={{ style: { color: "white" } }}
+            />
+            <Button
+              variant="contained"
+              onClick={connect}
+              fullWidth
+              disabled={!username.trim()}
+              style={{ color: "white" }}
+            >
+              Connect
+            </Button>
+          </div>
 
           <div>
             <video ref={localVideoref} autoPlay muted></video>
           </div>
         </div>
       ) : (
-        <div className={styles.meetVideoContainer}>
+        <div
+          className={`${styles.meetVideoContainer} ${getParticipantClass()} ${
+            chatOpen ? styles["chatRoom-open"] : ""
+          }`}
+        >
           {showModal ? (
-            <div className={styles.chatRoom}>
+            <div
+              className={`${styles.chatRoom} ${
+                !chatOpen ? styles["chatRoom-hidden"] : ""
+              }`}
+            >
               <div className={styles.chatContainer}>
-                <h1>Chat</h1>
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  mb={2}
+                >
+                  <h1>Chat</h1>
 
-                <div className={styles.chattingDisplay}>
+                  <IconButton onClick={closeChat}>
+                    <CloseIcon />
+                  </IconButton>
+                </Box>
+
+                <div className={styles.chattingDisplay} ref={chatContainerRef}>
                   {messages.length !== 0 ? (
-                    messages.map((item, index) => {
-                      console.log(messages);
-                      return (
-                        <div style={{ marginBottom: "20px" }} key={index}>
-                          <p style={{ fontWeight: "bold" }}>{item.sender}</p>
-                          <p>{item.data}</p>
-                        </div>
-                      );
-                    })
+                    messages.map((item, index) => (
+                      <div style={{ marginBottom: "20px" }} key={index}>
+                        <p style={{ fontWeight: "bold" }}>{item.sender}</p>
+                        <p>{item.data}</p>
+                      </div>
+                    ))
                   ) : (
                     <p>No Messages Yet</p>
                   )}
@@ -546,6 +618,9 @@ export default function VideoMeetComponent() {
                     id="outlined-basic"
                     label="Enter Your chat"
                     variant="outlined"
+                    size={isMobile ? "small" : "medium"}
+                    onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+                    fullWidth
                   />
                   <Button variant="contained" onClick={sendMessage}>
                     Send
@@ -553,9 +628,7 @@ export default function VideoMeetComponent() {
                 </div>
               </div>
             </div>
-          ) : (
-            <></>
-          )}
+          ) : null}
 
           <div className={styles.buttonContainers}>
             <IconButton onClick={handleVideo} style={{ color: "white" }}>
@@ -576,16 +649,11 @@ export default function VideoMeetComponent() {
                   <StopScreenShareIcon />
                 )}
               </IconButton>
-            ) : (
-              <></>
-            )}
+            ) : null}
 
-            <Badge badgeContent={newMessages} max={999} color="orange">
-              <IconButton
-                onClick={() => setModal(!showModal)}
-                style={{ color: "white" }}
-              >
-                <ChatIcon />{" "}
+            <Badge badgeContent={newMessages} max={999} color="error">
+              <IconButton onClick={openChat} style={{ color: "white" }}>
+                <ChatIcon />
               </IconButton>
             </Badge>
           </div>
@@ -608,6 +676,7 @@ export default function VideoMeetComponent() {
                     }
                   }}
                   autoPlay
+                  playsInline
                 ></video>
               </div>
             ))}

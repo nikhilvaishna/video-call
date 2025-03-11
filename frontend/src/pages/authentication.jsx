@@ -3,19 +3,13 @@ import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import CssBaseline from "@mui/material/CssBaseline";
 import TextField from "@mui/material/TextField";
-// import FormControlLabel from '@mui/material/FormControlLabel';
-// import Checkbox from '@mui/material/Checkbox';
-// import Link from '@mui/material/Link';
 import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
-// import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { AuthContext } from "../contexts/AuthContext";
-import { Snackbar } from "@mui/material";
-
-// TODO remove, this demo shouldn't need to reset the theme.
+import { Snackbar, useMediaQuery } from "@mui/material";
 
 const defaultTheme = createTheme();
 
@@ -25,11 +19,10 @@ export default function Authentication() {
   const [name, setName] = React.useState("");
   const [error, setError] = React.useState("");
   const [message, setMessage] = React.useState("");
-
   const [formState, setFormState] = React.useState(0);
-
   const [open, setOpen] = React.useState(false);
-
+  
+  const isMobile = useMediaQuery(defaultTheme.breakpoints.down('sm'));
   const { handleRegister, handleLogin } = React.useContext(AuthContext);
 
   let handleAuth = async () => {
@@ -57,25 +50,66 @@ export default function Authentication() {
 
   return (
     <ThemeProvider theme={defaultTheme}>
-      <Grid container component="main" sx={{ height: "100vh" }}>
+      <Grid 
+        container 
+        component="main" 
+        sx={{ 
+          height: "100vh",
+          position: "relative",
+          ...(isMobile && {
+            '&::before': {
+              content: '""',
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundImage: 'url(/background.png)',
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              backgroundPosition: 'center',
+              opacity: 0.4,
+              zIndex: 1,
+            }
+          })
+        }}
+      >
         <CssBaseline />
-        <Grid
-          item
-          xs={false}
-          sm={4}
-          md={7}
+        {!isMobile && (
+          <Grid
+            item
+            xs={false}
+            sm={4}
+            md={7}
+            sx={{
+              backgroundImage: "url(/background.png)",
+              backgroundRepeat: "no-repeat",
+              backgroundColor: (t) =>
+                t.palette.mode === "light"
+                  ? t.palette.grey[50]
+                  : t.palette.grey[900],
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          />
+        )}
+        <Grid 
+          item 
+          xs={12} 
+          sm={8} 
+          md={5} 
+          component={Paper} 
+          elevation={6} 
+          square
           sx={{
-            backgroundImage: "url(/background.png)",
-            backgroundRepeat: "no-repeat",
-            backgroundColor: (t) =>
-              t.palette.mode === "light"
-                ? t.palette.grey[50]
-                : t.palette.grey[900],
-            backgroundSize: "cover",
-            backgroundPosition: "center",
+            ...(isMobile && {
+              backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              backdropFilter: 'blur(5px)',
+              position: 'relative',
+              zIndex: 2,
+            })
           }}
-        />
-        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        >
           <Box
             sx={{
               my: 8,
