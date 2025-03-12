@@ -96,10 +96,8 @@ export default function VideoMeetComponent() {
       });
       if (videoPermission) {
         setVideoAvailable(true);
-        console.log("Video permission granted");
       } else {
         setVideoAvailable(false);
-        console.log("Video permission denied");
       }
 
       const audioPermission = await navigator.mediaDevices.getUserMedia({
@@ -107,11 +105,9 @@ export default function VideoMeetComponent() {
       });
       if (audioPermission) {
         setAudioAvailable(true);
-        console.log("Audio permission granted");
         return;
       } else {
         setAudioAvailable(false);
-        console.log("Audio permission denied");
       }
 
       if (navigator.mediaDevices.getDisplayMedia) {
@@ -140,7 +136,6 @@ export default function VideoMeetComponent() {
   useEffect(() => {
     if (video !== undefined && audio !== undefined) {
       getUserMedia();
-      console.log("SET STATE HAS ", video, audio);
     }
   }, [video, audio]);
 
@@ -166,7 +161,6 @@ export default function VideoMeetComponent() {
       connections[id].addStream(window.localStream);
 
       connections[id].createOffer().then((description) => {
-        console.log(description);
         connections[id]
           .setLocalDescription(description)
           .then(() => {
@@ -476,7 +470,7 @@ export default function VideoMeetComponent() {
       let tracks = localVideoref.current.srcObject.getTracks();
       tracks.forEach((track) => track.stop());
     } catch (e) {}
-    window.location.href = "/home";
+    window.location.href = `${server}/home`;
   };
 
   // Modified chat functions for responsive design
@@ -649,7 +643,9 @@ export default function VideoMeetComponent() {
                   <StopScreenShareIcon />
                 )}
               </IconButton>
-            ) : null}
+            ) : (
+              <></>
+            )}
 
             <Badge badgeContent={newMessages} max={999} color="error">
               <IconButton onClick={openChat} style={{ color: "white" }}>
