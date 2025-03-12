@@ -43,8 +43,8 @@
 .conferenceView {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+    /* justify-content: center; */
+    /* align-items: center; */
     padding: 10px;
     gap: 10px;
     height: calc(100vh - 80px);
@@ -54,7 +54,7 @@
 /* Dynamic grid system for videos */
 .conferenceView video {
     width: 45%;
-    max-height: 40vh;
+    max-height: 60vh;
     border-radius: 10px;
     object-fit: cover;
     transition: all 0.3s ease;
